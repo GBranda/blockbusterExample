@@ -26,14 +26,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true,
         references: {
-          model: film,
+          model: 'film',
           key: "id",
         },
     },
     idUser: {
       type: DataTypes.INTEGER,
       references: {
-        model: user,
+        model: 'user',
         key: "id",
       },
     }, 
