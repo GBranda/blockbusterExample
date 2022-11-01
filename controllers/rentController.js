@@ -24,7 +24,54 @@ const rentFilm = (req, res, next) => {
         })
 }
 
+const daysDifference = (start, end) => {
+
+    const dateOne = new Date(start)
+
+    const dateSecond = new Date(end)
+
+    const oneDay = (3600 * 1000 * 24)
+
+    const differenceTime = dateSecond.getTime() - dateOne.getTime()
+
+    const differenceDays = Math.round(differenceTime / oneDay)
+
+    return differenceDays
+}
+
+const lateRefund = async (originalPrice, daysLate) => {
+    let finalPrice = originalPrice;
+
+    for (let i = 0; i < daysLate; i++) {
+        finalPrice += finalPrice * 0.1
+    };
+
+    return finalPrice;
+}
+
+const refundFilm = (req, res, next) => {
+
+    const { idFilm } = req.params
+
+    rent.update({ userRefundDate: Date.now() }, { where: { idFilm: idFilm, idUser: req.user.id } })
+        .then(async rent => {
+            let movie = await film.findOne({ where: { id: idFilm } })
+            film.update({ stock: movie.stock + 1 }, { where: { id: idFilm } })
+                .then(() => {
+                    if (daysDifference(rent.rentDate, rent.userRefundDate) <= daysDifference(rent.rentDate, rent.refundDate)) {
+                        
+                        res.status(200).send({ msg: `Entrega a tiempo, Precio final: ${daysDifference(rent.rentDate, rent.refundDate) * 10}`, onTime: true })
+                    } else {
+                        res.status(200).send({ msg: `Entrega tardia, Precio final: ${lateRefund(daysDifference(rent.rentDate, rent.refundDate) * 10, daysDifference(rent.userRefundDate,rent.refundDate))} `, onTime: false })
+                    }
+                })
+        })
+
+}
+
+
 
 module.exports = {
-    rentFilm
+    rentFilm,
+    refundFilm
 }
