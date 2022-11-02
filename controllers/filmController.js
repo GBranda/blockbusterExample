@@ -141,6 +141,14 @@ const getfilmsByName = async (req, res, next) => {
     }
 }
 
+const updateStock = (req, res, next) => {
+    const id = req.params
+    const {stock} = req.body
+    film.update({stock: stock}, {where: {id}})
+        .then(film => res.status(200).send("Film Stock Successfully Updated"))
+        .catch(err => next(err))
+}
+
 module.exports = {
     getfilms,
     getfilmDetails,
@@ -148,5 +156,6 @@ module.exports = {
     addfilm,
     addFavourite,
     allFavouritesfilms,
-    getfilmsByName
+    getfilmsByName,
+    updateStock
 }

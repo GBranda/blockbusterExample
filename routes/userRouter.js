@@ -8,9 +8,10 @@ const rentController = require('../controllers/rentController')
 
 
 userRouter.get('/favourites', check.checkLoggedIn, filmController.allFavouritesfilms)
-userRouter.get('/rented', check.checkLoggedIn, rentController.rentedFilmsByUser)
+userRouter.get('/rentHistory', check.checkLoggedIn, rentController.rentHistory)
 userRouter.post('/favourite/:code', check.checkLoggedIn, filmController.addFavourite)
-userRouter.post('/rent/:code', check.checkLoggedIn, rentController.rentFilm)
+userRouter.post('/rent/:id', check.checkLoggedIn, rentController.rentFilm)
+userRouter.post('/update/:id', check.checkAdmin, filmController.updateStock)
 userRouter.use(errorHandler.errorLogger)
 
 module.exports = userRouter;

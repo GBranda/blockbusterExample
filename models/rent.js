@@ -11,8 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      rent.belongsTo(models.user);
-      rent.belongsTo(models.film);
+      rent.belongsTo(models.user), {
+        targetKey: 'idUser'
+      };
+      rent.belongsTo(models.film), {
+        targetKey: 'filmId'
+      };
     }
   }
   rent.init({
@@ -22,11 +26,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER,
     },
-    idUser: {
+    userId: {
       allowNull: false,
       type: DataTypes.INTEGER
     },
-    idFilm: {
+    filmId: {
       type: DataTypes.STRING,
       allowNull: false,
       foreignKey: true,

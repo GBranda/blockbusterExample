@@ -6,18 +6,17 @@ const { Op } = require('sequelize');
 
 const rentFilm = (req, res, next) => {
     const { id } = req.params;
-
     film.findOne({ where: { id: id, stock: { [Op.gt]: 0 } } })
-        .then(rental => {
-            if (!rental) throw new Error(' Missing stock ')
+        .then(movie => {
+            if (!movie) throw new Error(' Missing stock ')
             rent.create({
-                id: rental.idRent,
-                idUser: req.user.id,
+                filmId: movie.id,
+                userId: req.user.id,
                 rentDate: Date.now(),
                 refundDate: new Date(Date.now() + (3600 * 1000 * 24) * 7),
 
             }).then(data => {
-                film.update({ stock: rental.stock - 1, rentals: rental.rentals + 1 }, { where: { id: rental.idRent } })
+                film.update({ stock: movie.stock - 1, rentals: movie.rentals + 1 }, { where: { id: movie.id } })
                     .then(() => res.status(201).send(data))
             })
         })
@@ -50,12 +49,12 @@ const lateRefund = async (originalPrice, daysLate) => {
 }
 
 const refundFilm = (req, res, next) => {
-    const { idFilm } = req.params
+    const { filmId } = req.params
 
-    rent.update({ userRefundDate: Date.now() }, { where: { idFilm: idFilm, idUser: req.user.id } })
+    rent.update({ userRefundDate: Date.now() }, { where: { filmId: filmId, userId: req.user.id } })
         .then(async rent => {
-            let movie = await film.findOne({ where: { id: idFilm } })
-            film.update({ stock: movie.stock + 1 }, { where: { id: idFilm } })
+            let movie = await film.findOne({ where: { id: filmId } })
+            film.update({ stock: movie.stock + 1 }, { where: { id: filmId } })
                 .then(() => {
                     if (daysDifference(rent.rentDate, rent.userRefundDate) <= daysDifference(rent.rentDate, rent.refundDate)) {
 
@@ -69,21 +68,18 @@ const refundFilm = (req, res, next) => {
         .catch(err => next(err))
 }
 
-const rentedFilmsByUser = (req, res, next) => {
+const rentHistory = (req, res, next) => {
     let userId = req.user.id
 
-    rent.findAll({ where: { idUser: userId } })
-        .then(data => {
-            let moviesRented = data.map(async rents => ({
-                film: await film.findOne({ where: { id: rents.idFilm } })
-            }))
-            res.status(200).send(moviesRented)
-        })
+    rent.findAll({ where: { userId: userId } })
+        .then(data => res.status(200).send(data))
         .catch(err => next(err))
 }
+
+
 
 module.exports = {
     rentFilm,
     refundFilm,
-    rentedFilmsByUser
+    rentHistory
 }
