@@ -5,7 +5,6 @@ const { Op } = require('sequelize');
 
 
 const rentFilm = (req, res, next) => {
-
     const { id } = req.params;
 
     film.findOne({ where: { id: id, stock: { [Op.gt]: 0 } } })
@@ -22,6 +21,7 @@ const rentFilm = (req, res, next) => {
                     .then(() => res.status(201).send(data))
             })
         })
+        .catch(err => next(err))
 }
 
 const daysDifference = (start, end) => {
@@ -50,7 +50,6 @@ const lateRefund = async (originalPrice, daysLate) => {
 }
 
 const refundFilm = (req, res, next) => {
-
     const { idFilm } = req.params
 
     rent.update({ userRefundDate: Date.now() }, { where: { idFilm: idFilm, idUser: req.user.id } })
@@ -59,19 +58,32 @@ const refundFilm = (req, res, next) => {
             film.update({ stock: movie.stock + 1 }, { where: { id: idFilm } })
                 .then(() => {
                     if (daysDifference(rent.rentDate, rent.userRefundDate) <= daysDifference(rent.rentDate, rent.refundDate)) {
-                        
+
                         res.status(200).send({ msg: `Entrega a tiempo, Precio final: ${daysDifference(rent.rentDate, rent.refundDate) * 10}`, onTime: true })
                     } else {
-                        res.status(200).send({ msg: `Entrega tardia, Precio final: ${lateRefund(daysDifference(rent.rentDate, rent.refundDate) * 10, daysDifference(rent.userRefundDate,rent.refundDate))} `, onTime: false })
+                        res.status(200).send({ msg: `Entrega tardia, Precio final: ${lateRefund(daysDifference(rent.rentDate, rent.refundDate) * 10, daysDifference(rent.userRefundDate, rent.refundDate))} `, onTime: false })
                     }
                 })
+                .catch(err => next(err))
         })
-
+        .catch(err => next(err))
 }
 
+const rentedFilmsByUser = (req, res, next) => {
+    let userId = req.user.id
 
+    rent.findAll({ where: { idUser: userId } })
+        .then(data => {
+            let moviesRented = data.map(async rents => ({
+                film: await film.findOne({ where: { id: rents.idFilm } })
+            }))
+            res.status(200).send(moviesRented)
+        })
+        .catch(err => next(err))
+}
 
 module.exports = {
     rentFilm,
-    refundFilm
+    refundFilm,
+    rentedFilmsByUser
 }

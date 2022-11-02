@@ -12,12 +12,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       favouriteFilms.hasMany(models.film, {
-        foreignKey: "idFilm",
-        target_key: "id",
+        foreignKey: "id",
+        target_key: "idFilm",
       });
       favouriteFilms.hasMany(models.user, {
-        foreignKey: "idUser",
-        target_key: "id",
+        foreignKey: "id",
+        target_key: "idUser",
       });
     }
   }

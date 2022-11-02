@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const filmsRouter = express.Router();
 const filmController = require('../controllers/filmController');
 const userController = require('../controllers/userController');
 const check = require('../middlewares/checks')
@@ -7,10 +7,9 @@ const errorHandler = require('../middlewares/errorHandler');
 const rentController = require('../controllers/rentController')
 
 
-router.post('/register', userController.register)
-router.get('/login', (req, res)=> res.send('Iniciar sesion'))
-router.post('/login', userController.login)
-router.get('/logout',check.checkLoggedIn, userController.logout)
-router.use(errorHandler.errorLogger)
+filmsRouter.get('/', filmController.getfilms);
+filmsRouter.get('/:id', filmController.getfilmDetails);
+filmsRouter.get('/search/:name', filmController.getfilmsByName);
+filmsRouter.use(errorHandler.errorLogger)
 
-module.exports = router;
+module.exports = filmsRouter;

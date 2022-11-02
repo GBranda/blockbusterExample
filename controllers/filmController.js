@@ -85,7 +85,9 @@ const addFavourite = async (req, res, next) => {
         const { review } = req.body;
 
         film.findOne({ where: { id: id } }).then(film => {
-            if (!film) throw new Error(' Pelicula no disponible ')
+            if (!film) {
+                throw new Error('Film not Available')
+            }
 
             const newFavouriteFilms = {
                 idFilm: film.id,
@@ -94,7 +96,9 @@ const addFavourite = async (req, res, next) => {
             };
 
             favouriteFilms.create(newFavouriteFilms).then(newFav => {
-                if (!newFav) throw new Error('FAILED to add favorite film')
+                if (!newFav) {
+                    throw new Error('FAILED to add favorite film')
+                }
 
                 res.status(201).send("film Added to Favorites");
             });
@@ -127,12 +131,22 @@ const allFavouritesfilms = async (req, res, next) => {
 
 }
 
+const getfilmsByName = async (req, res, next) => {
+    try {
+        const { name } = req.params;
+        let films = await getFilmFromAPIByName(name)
+        res.status(200).send(films);
+    } catch (error) {
+        error => next(error)
+    }
+}
+
 module.exports = {
     getfilms,
     getfilmDetails,
     getfilmsByRuntime,
     addfilm,
     addFavourite,
-    allFavouritesfilms
-
+    allFavouritesfilms,
+    getfilmsByName
 }

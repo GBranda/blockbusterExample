@@ -49,11 +49,18 @@ const register = (req, res, next) => {
         return res.status(201).json({
             ok: true,
             usuario: usuarioDB
-        }).catch(error => next(error));
-    })
+        })
+    }).catch(error => next(error));
 }
+
+const logout = (req, res, next) => {
+    req.user = undefined
+    res.redirect('/login')
+}
+
 
 module.exports = {
     login,
-    register
+    register,
+    logout
 }
