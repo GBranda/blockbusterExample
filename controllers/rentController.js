@@ -24,17 +24,17 @@ const rentFilm = (req, res, next) => {
 }
 
 const daysDifference = (start, end) => {
-
+    
     const dateOne = new Date(start)
-
+    
     const dateSecond = new Date(end)
-
+    
     const oneDay = (3600 * 1000 * 24)
 
     const differenceTime = dateSecond.getTime() - dateOne.getTime()
 
     const differenceDays = Math.round(differenceTime / oneDay)
-
+    
     return differenceDays
 }
 
@@ -52,15 +52,15 @@ const refundFilm = (req, res, next) => {
     const { filmId } = req.params
 
     rent.update({ userRefundDate: Date.now() }, { where: { filmId: filmId, userId: req.user.id } })
-        .then(async rent => {
+        .then(async rentId => {
+            let updatedRent = await rent.findOne({where: {idRent: rentId[0]}})
             let movie = await film.findOne({ where: { id: filmId } })
             film.update({ stock: movie.stock + 1 }, { where: { id: filmId } })
-                .then(() => {
-                    if (daysDifference(rent.rentDate, rent.userRefundDate) <= daysDifference(rent.rentDate, rent.refundDate)) {
-
-                        res.status(200).send({ msg: `Entrega a tiempo, Precio final: ${daysDifference(rent.rentDate, rent.refundDate) * 10}`, onTime: true })
+                .then( async () => {
+                    if (daysDifference(updatedRent.dataValues.rentDate, updatedRent.dataValues.userRefundDate) <= daysDifference(updatedRent.dataValues.rentDate, updatedRent.dataValues.refundDate)) {
+                        await res.status(200).send({ msg: `Entrega a tiempo, Precio final: ${daysDifference(updatedRent.dataValues.rentDate, updatedRent.dataValues.refundDate) * 10}`, onTime: true })
                     } else {
-                        res.status(200).send({ msg: `Entrega tardia, Precio final: ${lateRefund(daysDifference(rent.rentDate, rent.refundDate) * 10, daysDifference(rent.userRefundDate, rent.refundDate))} `, onTime: false })
+                        await res.status(200).send({ msg: `Entrega tardia, Precio final: ${lateRefund(daysDifference(updatedRent.dataValues.rentDate, updatedRent.dataValues.refundDate) * 10, daysDifference(updatedRent.dataValues.userRefundDate, updatedRent.dataValues.refundDate))} `, onTime: false })
                     }
                 })
                 .catch(err => next(err))
