@@ -40,7 +40,7 @@ Simple API REST that performs CRUD operation for user data management.
     - rent a film, sending film id through param
 - /user/refund/:filmId
     - refund a film, sending film id through param
-- /user/update/:filmId
+- /films/update/:filmId
     - Endpoint used for update film stock, only available for administrators
-- /user/delete/:filmId
+- /films/delete/:filmId
     - Endpoint used for delete a film, only available for administrators
