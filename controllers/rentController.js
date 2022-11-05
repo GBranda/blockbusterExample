@@ -70,10 +70,16 @@ const refundFilm = (req, res, next) => {
 
 const rentHistory = (req, res, next) => {
     let userId = req.user.id
-
+    const order = req.query
     rent.findAll({ where: { userId: userId } })
-        .then(data => res.status(200).send(data))
-        .catch(err => next(err))
+        .then(data => {
+            if(order.order === 'desc'){
+                data.sort((a, b) => b.rentDate.getTime() - a.rentDate.getTime())
+            } else{
+                data.sort((a, b) => a.rentDate.getTime() - b.rentDate.getTime())
+            }
+            res.status(200).send(data)
+        }).catch(err => next(err))
 }
 
 

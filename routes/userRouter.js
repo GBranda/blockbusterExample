@@ -11,8 +11,9 @@ userRouter.get('/favourites', check.checkLoggedIn, filmController.allFavouritesf
 userRouter.get('/rentHistory', check.checkLoggedIn, rentController.rentHistory)
 userRouter.post('/favourite/:id', check.checkLoggedIn, filmController.addFavourite)
 userRouter.post('/rent/:id', check.checkLoggedIn, rentController.rentFilm)
-userRouter.put('/update/:filmId', check.checkAdmin, filmController.updateStock)
 userRouter.put('/refund/:filmId', check.checkLoggedIn, rentController.refundFilm)
+userRouter.put('/update/:filmId', check.checkAdmin, filmController.updateStock)
+userRouter.put('/delete/:filmId', check.checkAdmin, filmController.deleteFilm)
 userRouter.use(errorHandler.errorLogger)
 
 module.exports = userRouter;

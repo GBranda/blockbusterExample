@@ -11,6 +11,7 @@ async function getFilmFromAPIByName(name) {
 }
 
 const getfilms = async (req, res) => {
+    let order = req.query
     let films = await fetch('https://ghibliapi.herokuapp.com/films');
     films = await films.json()
     films = films.map(film => ({
@@ -23,6 +24,11 @@ const getfilms = async (req, res) => {
         running_time: film.running_time,
         rt_score: film.rt_score
     }));
+    if(order.order === 'desc'){
+        films.sort((a, b) => b.title.localeCompare(a.title))
+    } else{
+        films.sort((a, b) => a.title.localeCompare(b.title))
+    }
     res.status(200).send(films);
 }
 
@@ -110,6 +116,7 @@ const addFavourite = async (req, res, next) => {
 
 const allFavouritesfilms = async (req, res, next) => {
     try {
+        const order = req.query
         const allFilms = await favouriteFilms.findAll({ where: { idUser: req.user.id } })
 
         const filmReduced = allFilms.map(film => {
@@ -124,6 +131,11 @@ const allFavouritesfilms = async (req, res, next) => {
                 }
             }
         })
+        if(order.order === 'desc'){
+            filmReduced.sort((a, b) => b.id - a.id)
+        } else{
+            filmReduced.sort((a, b) => a.id - b.id)
+        }
         res.status(200).json(filmReduced);
     } catch (error) {
         error => next(error);
@@ -133,8 +145,14 @@ const allFavouritesfilms = async (req, res, next) => {
 
 const getfilmsByName = async (req, res, next) => {
     try {
+        const order = req.query
         const { name } = req.params;
         let films = await getFilmFromAPIByName(name)
+        if(order.order === 'desc'){
+            films.sort((a, b) => b.title.localeCompare(a.title))
+        } else{
+            films.sort((a, b) => a.title.localeCompare(b.title))
+        }
         res.status(200).send(films);
     } catch (error) {
         error => next(error)
@@ -149,6 +167,13 @@ const updateStock = (req, res, next) => {
         .catch(err => next(err))
 }
 
+const deleteFilm = (req, res, next) => {
+    const {filmId} = req.params
+    film.destroy({where: {id: filmId}})
+        .then(film => res.status(200).send("Film Successfully Deleted"))
+        .catch(err => next(err))
+}
+
 module.exports = {
     getfilms,
     getfilmDetails,
@@ -157,5 +182,6 @@ module.exports = {
     addFavourite,
     allFavouritesfilms,
     getfilmsByName,
-    updateStock
+    updateStock,
+    deleteFilm
 }
