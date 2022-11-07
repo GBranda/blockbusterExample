@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const filmController = require('../controllers/filmController');
 const userController = require('../controllers/userController');
 const check = require('../middlewares/checks')
 const errorHandler = require('../middlewares/errorHandler');
-const rentController = require('../controllers/rentController')
 
 
 router.post('/register', userController.register)

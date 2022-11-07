@@ -1,5 +1,4 @@
 const fetch = (url) => import('node-fetch').then(({ default: fetch }) => fetch(url));
-const GHIBLI_APP = 'https://ghibliapi.herokuapp.com/films/'
 const db = require('../models/index')
 const { film, favouriteFilms } = db;
 const jwt = require("jsonwebtoken");
@@ -24,29 +23,11 @@ const getfilms = async (req, res) => {
         running_time: film.running_time,
         rt_score: film.rt_score
     }));
-    if(order.order === 'desc'){
+    if (order.order === 'desc') {
         films.sort((a, b) => b.title.localeCompare(a.title))
-    } else{
+    } else {
         films.sort((a, b) => a.title.localeCompare(b.title))
     }
-    res.status(200).send(films);
-}
-
-const getfilmsByRuntime = async (req, res) => {
-    const maxRuntime = req.params.max
-    let films = await fetch('https://ghibliapi.herokuapp.com/films');
-    films = await films.json()
-    films = films.map(film => ({
-        id: film.id,
-        title: film.title,
-        description: film.description,
-        director: film.director,
-        producer: film.producer,
-        release_date: film.producer,
-        running_time: film.running_time,
-        rt_score: film.rt_score
-    }));
-    if (maxRuntime < 137) films = films.filter(film => film.running_time <= maxRuntime)
     res.status(200).send(films);
 }
 
@@ -90,6 +71,14 @@ const addFavourite = async (req, res, next) => {
         const id = req.params.id;
         const { review } = req.body;
 
+        const verifyFavouriteFilms = await favouriteFilms.findOne({ where: { idUser: req.user.id, idFilm: id} })
+
+        if (verifyFavouriteFilms.length > 0) {
+            return res
+                .status(400)
+                .json({ errorMessage: "Film is already added to favorite" })
+        }
+
         film.findOne({ where: { id: id } }).then(film => {
             if (!film) {
                 throw new Error('Film not Available')
@@ -131,9 +120,9 @@ const allFavouritesfilms = async (req, res, next) => {
                 }
             }
         })
-        if(order.order === 'desc'){
+        if (order.order === 'desc') {
             filmReduced.sort((a, b) => b.id - a.id)
-        } else{
+        } else {
             filmReduced.sort((a, b) => a.id - b.id)
         }
         res.status(200).json(filmReduced);
@@ -148,9 +137,9 @@ const getfilmsByName = async (req, res, next) => {
         const order = req.query
         const { name } = req.params;
         let films = await getFilmFromAPIByName(name)
-        if(order.order === 'desc'){
+        if (order.order === 'desc') {
             films.sort((a, b) => b.title.localeCompare(a.title))
-        } else{
+        } else {
             films.sort((a, b) => a.title.localeCompare(b.title))
         }
         res.status(200).send(films);
@@ -160,16 +149,16 @@ const getfilmsByName = async (req, res, next) => {
 }
 
 const updateStock = (req, res, next) => {
-    const {filmId} = req.params
-    const {stock} = req.body
+    const { filmId } = req.params
+    const { stock } = req.body
     film.update({ stock: stock }, { where: { id: filmId } })
-        .then( () => res.status(200).send("Film Stock Successfully Updated"))
+        .then(() => res.status(200).send("Film Stock Successfully Updated"))
         .catch(err => next(err))
 }
 
 const deleteFilm = (req, res, next) => {
-    const {filmId} = req.params
-    film.destroy({where: {id: filmId}})
+    const { filmId } = req.params
+    film.destroy({ where: { id: filmId } })
         .then(film => res.status(200).send("Film Successfully Deleted"))
         .catch(err => next(err))
 }
