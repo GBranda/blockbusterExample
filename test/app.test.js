@@ -45,9 +45,7 @@ describe("POST /register", () => {
                     "createdAt",
                     "updatedAt",
                 ]);
-                const userDB = await user.findOne({
-                    where: { email: userExample.email },
-                });
+                const userDB = await user.findOne({ where: { email: userExample.email } });
                 assert.exists(userDB);
                 assert.isTrue(
                     bcrypt.compareSync(
@@ -124,23 +122,59 @@ describe("GET /films", () => {
 
 describe("GET /films/:id", () => {
     it("Get Film Details By ID", (done) => {
-      request(app)
-        .get("/films/58611129-2dbc-4a81-a72f-77ddfc1b1b49")
-        .expect(200)
-        .then((response) => {
-          assert.isNotEmpty(response._body);
-          assert.isNotArray(response._body);
-          assert.containsAllKeys(response._body, [
-            "title",
-            "description",
-            "director",
-            "producer",
-            "release_date",
-            "running_time",
-            "rt_score",
-          ]);
-        })
-        .then(() => done(), done);
+        request(app)
+            .get("/films/58611129-2dbc-4a81-a72f-77ddfc1b1b49")
+            .expect(200)
+            .then((response) => {
+                assert.isNotEmpty(response._body);
+                assert.isNotArray(response._body);
+                assert.containsAllKeys(response._body, [
+                    "title",
+                    "description",
+                    "director",
+                    "producer",
+                    "release_date",
+                    "running_time",
+                    "rt_score",
+                ]);
+            })
+            .then(() => done(), done);
     });
-  });
+});
 
+/*describe('POST /user/favourite/:id', () => {
+    beforeEach(done => {
+        const userExample = {
+            email: "prueba@mail.com",
+            password: "prueba",
+            phone: "111-111-111",
+            dni: "11111111",
+        };
+
+          const filmExample = {
+            id: "2baf70d1-42bb-4437-b551-e5fed5a87abe",
+            title: "Castle in the Sky",
+            stock: "5",
+            rentals: "0",
+            review: "Colocar Review"
+          }
+    })
+    it("Should return 201 and set movie as favourite for logged user with review", done => {
+        // TO-DO
+        // Check status
+        // Check si se registro el cambio en la DB
+        // Check si el registro en la DB es correcto
+    })
+    it("Should return 201 and set movie as favourite for logged user without review", done => {
+        // TO-DO
+        // Check status
+        // Check si se registro el cambio en la DB
+        // Check si el registro en la DB es correcto
+    })
+    it("Should not allow to favourite the same movie twice", done => {
+        //TO-DO, llamar al endpoint con la misma peli 2 veces
+        // Check error status
+        // Check error message
+        // Check db que no se haya persistido un registro
+    })
+})*/

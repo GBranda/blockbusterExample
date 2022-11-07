@@ -10,6 +10,11 @@ app.use(express.json())
 app.use('/', router);
 app.use('/films', filmsRouter);
 app.use('/user', userRouter);
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+module.exports = {
+  app,
+  server
+};

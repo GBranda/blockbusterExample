@@ -166,7 +166,6 @@ const deleteFilm = (req, res, next) => {
 module.exports = {
     getfilms,
     getfilmDetails,
-    getfilmsByRuntime,
     addfilm,
     addFavourite,
     allFavouritesfilms,
