@@ -79,7 +79,6 @@ describe("POST /login", () => {
             .send(userExample)
             .then((response) => {
                 request(app)
-                console.log(response._body.usuario)
                     .post("/login")
                     .send({ email: response._body.usuario.email, password: response._body.usuario.password })
                     .expect(200)
@@ -155,7 +154,6 @@ describe("GET /films/search/:name", () => {
             .get("/films/search/Totoro")
             .expect(200)
             .then((response) => {
-                console.log(response._body)
                 assert.isNotEmpty(response._body);
                 assert.isArray(response._body);
                 assert.containsAllKeys(response._body, [
@@ -173,7 +171,7 @@ describe("GET /films/search/:name", () => {
     });
 });
 
-describe.only('POST /user/favourite/:id', () => {
+describe('POST /user/favourite/:id', () => {
 
     const userExample = {
         email: "prueba@mail.com",
@@ -333,7 +331,7 @@ describe('POST /user/rent/:id', () => {
     })
 
 
-    it.only("Should not allow rent if there is no stock", done => {
+    it("Should not allow rent if there is no stock", done => {
 
         request(app)
             .post('/login')
