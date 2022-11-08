@@ -4,7 +4,7 @@ const request = require("supertest");
 const assert = require("chai").assert;
 const { app } = require("../app");
 const db = require("../models/index");
-const { user, favoriteFilms } = db;
+const { user, favoriteFilms, film, rent } = db;
 const bcrypt = require("bcrypt");
 const { BaseError } = require("sequelize");
 
@@ -286,6 +286,99 @@ describe('GET /user/favourites', () => {
             .get(`/user/favourites`)
             .expect(401)
             .then(async (response) => {
+                assert.equal(response._body.error, "Not Logged In")
+            })
+            .then(() => done(), done);
+    })
+
+})
+
+describe('POST /user/rent/:id', () => {
+
+    const userExample = {
+        email: "prueba@mail.com",
+        password: "prueba",
+        phone: "111-111-111",
+        dni: "11111111",
+    };
+
+    const movieExample = {
+        id: "2baf70d1-42bb-4437-b551-e5fed5a87abe",
+    }
+
+    const movieWhithoutStock = {
+        id: "58611129-2dbc-4a81-a72f-77ddfc1b1b49"
+    }
+
+    it("Should return 201 and successfully rent a movie", done => {
+
+        request(app)
+            .post('/login')
+            .send(userExample)
+            .expect(200)
+            .then((User) => {
+                request(app)
+                    .post(`/user/rent/${movieExample.id}`)
+                    .set({ Authorization: `Bearer ${User._body.token}` })
+                    .expect(201)
+                    .then(async (response) => {
+                        const rent = await rent.findAll()
+                        const movie = await film.findOne({ where: { idFilm: movieExample.id } })
+                        assert.isNotEmpty(response._body)
+                        assert.operator(rent[0].idRent, ">", 0)
+                        assert.operator(movie.rentals, ">", 0)
+                    })
+                    .then(() => done(), done)
+            })
+    })
+
+
+    it.only("Should not allow rent if there is no stock", done => {
+
+        request(app)
+            .post('/login')
+            .send(userExample)
+            .expect(200)
+            .then(async (User) => {
+                const withoutStock = await film.film.update({ stock: 0, rentals: 1 }, { where: { id: withoutStock.id } })
+                request(app)
+                    .post(`/user/rent/${withoutStock.code}`)
+                    .set({ Authorization: `Bearer ${User._body.token}` })
+                    .expect(400)
+                    .then(async (response) => {
+                        assert.equal(response._body.error, ' Missing stock ')
+                        assert.equal(withoutStock.stock, 0)
+                    })
+                    .then(() => done(), done);
+            })
+    })
+
+
+
+    it("Should not allow rent if movie does not exist", done => {
+        request(app)
+            .post('/login')
+            .send(userExample)
+            .expect(200)
+            .then((User) => {
+                request(app)
+                    .post(`/user/rent/xxxxxxxxxxxxxx`)
+                    .set({ Authorization: `Bearer ${User._body.token}` })
+                    .expect(404)
+                    .then((response) => {
+                        assert.equal(response._body.error, "Movie Not Found")
+                    })
+                    .then(() => done(), done);
+            })
+    })
+
+
+    it("Should not allow non logged user to rent a movie", done => {
+
+        request(app)
+            .post(`/user/rent/${movieExample.id}`)
+            .expect(401)
+            .then((response) => {
                 assert.equal(response._body.error, "Not Logged In")
             })
             .then(() => done(), done);
