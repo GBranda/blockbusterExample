@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 async function getFilmFromAPIByName(name) {
     let films = await fetch('https://ghibliapi.herokuapp.com/films')
     films = await films.json();
-    return films.find(film => film.title.includes(name))
+    return films.filter(film => film.title.includes(name))
 }
 
 const getfilms = async (req, res) => {
@@ -71,7 +71,7 @@ const addFavourite = async (req, res, next) => {
         const id = req.params.id;
         const { review } = req.body;
 
-        const verifyFavouriteFilms = await favouriteFilms.findOne({ where: { idUser: req.user.id, idFilm: id} })
+        const verifyFavouriteFilms = await favouriteFilms.findOne({ where: { idUser: req.user.id, idFilm: id } })
 
         if (verifyFavouriteFilms.length > 0) {
             return res
@@ -137,6 +137,16 @@ const getfilmsByName = async (req, res, next) => {
         const order = req.query
         const { name } = req.params;
         let films = await getFilmFromAPIByName(name)
+        films = films.map(film => ({
+            id: film.id,
+            title: film.title,
+            description: film.description,
+            director: film.director,
+            producer: film.producer,
+            release_date: film.producer,
+            running_time: film.running_time,
+            rt_score: film.rt_score
+        }));
         if (order.order === 'desc') {
             films.sort((a, b) => b.title.localeCompare(a.title))
         } else {
