@@ -53,7 +53,7 @@ const refundFilm = (req, res, next) => {
 
     rent.update({ userRefundDate: Date.now() }, { where: { filmId: filmId, userId: req.user.id } })
         .then(async rentId => {
-            let updatedRent = await rent.findOne({where: {idRent: rentId[0]}})
+            let updatedRent = await rent.findOne({ where: { filmId: filmId, userId: req.user.id } })
             let movie = await film.findOne({ where: { id: filmId } })
             film.update({ stock: movie.stock + 1 }, { where: { id: filmId } })
                 .then( async () => {

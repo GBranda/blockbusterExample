@@ -72,13 +72,13 @@ const addFavourite = async (req, res, next) => {
         const { review } = req.body;
 
         const verifyFavouriteFilms = await favouriteFilms.findOne({ where: { idUser: req.user.id, idFilm: id } })
-
-        if (verifyFavouriteFilms.length > 0) {
+        
+        if (verifyFavouriteFilms) {
             return res
                 .status(400)
                 .json({ errorMessage: "Film is already added to favorite" })
         }
-
+        
         film.findOne({ where: { id: id } }).then(film => {
             if (!film) {
                 throw new Error('Film not Available')
